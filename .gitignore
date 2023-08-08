@@ -1,0 +1,5 @@
+/src/*
+iac/terraform/terraform.tfstate*
+iac/terraform/.terraform/*
+iac/terraform/tfplan
+iac/**/run.local.sh

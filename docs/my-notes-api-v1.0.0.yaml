@@ -1,0 +1,226 @@
+openapi: '3.0.2'
+info:
+  version: '1.0.0'
+  title: Public API for MyNotes.co.nz
+  description: |
+    The public APIs for mynotes.co.nz that can be used by customers and is also consumed 
+    by the internal *MyNotes* Angular client.
+
+    ## Change Log
+
+    v1.0.0
+    - Production API
+
+    v0.0.2
+    - Beta version of the API
+    - Added mutable operations
+
+    v0.0.1
+    - Alpha version of the API
+    - Contains read-only version
+
+servers:
+  - url: https://api.mynotes.co.nz/v1.0
+    description: Production environment (contains live data)
+
+  - url: https://preapi.mynotes.co.nz/v1.0
+    description: Preproduction environment environment(production-like environment)
+
+  - url: https://uatapi.mynotes.co.nz/v1.0
+    description: Preproduction environment
+
+  - url: https://sitapi.mynotes.co.nz/v1.0
+    description: System Integation Testenvironment
+
+paths:
+  /note/{noteId}:
+    get:
+      operationId: GetNote
+      summary: Retrieves a note by its ID
+      parameters:
+        - name: noteId
+          in: path
+          description: | 
+            The ID of the note to retrieve. This value is generated when a note is saved.
+            Only notes associated with the authenticated user can be retrieved.
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteView'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: 'https://mynotes.co.nz/docs/errors#invalid-note'
+                title: 'An error occurred while processing your request.'
+                status: 500
+                traceId: '2304-328-02385-0235-03825'
+        '401': 
+          description: Unauthorized
+
+        '403':
+          description: Forbidden
+
+        '404':
+          description: Not Found
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: 'https://tools.ietf.org/html/rfc7231#section-6.6.1'
+                title: 'An error occurred while processing your request.'
+                status: 500
+                traceId: '2304-328-02385-0235-03825'
+
+  /note:
+    post:
+      operationId: CreateNote
+      summary: Creates a new note
+      requestBody:
+        description: The note to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteData'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                example:
+                  id: 7
+          
+
+    patch:
+      operationId: UpdateNote
+      summary: Updates an existing note
+      parameters:
+        - name: noteId
+          in: query
+          description: | 
+            The ID of the note to update. This value is generated when a note is saved.
+            Only notes associated with the authenticated user can be updated.
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        description: The note to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteData'
+      responses:
+        "200":
+          description: OK
+    
+components:
+  schemas:
+    NoteData:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the note
+        content:
+          type: string
+          description: The content of the note
+      required:
+        - title
+      example:
+        title: 'My first note'
+        content: 'This is the content of my first note'
+
+    NoteView:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        title:
+          type: string
+          description: The title of the note
+        content:
+          type: string
+          description: The content of the note
+        created:
+          type: string
+          format: date-time
+          description: The date and time the note was created
+        modified:
+          type: string
+          format: date-time
+          description: The date and time the note was last modified
+      required:
+        - id
+        - title
+        - content
+        - created
+        - modified
+      example:
+        id: 10045648
+        title: 'My first note'
+        content: 'This is the content of my first note'
+        created: '2020-01-01T00:00:00'
+        modified: '2020-01-01T00:00:00'
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    ProblemDetails:
+      type: object
+      properties: 
+        type:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        status:
+          type: integer
+        instance:
+          type: string
+        errors:
+          type: object
+        extensions:
+          type: object
+
+      example:
+        type: 'https://tools.ietf.org/html/rfc7231#section-6.5.1'
+        title: 'One or more validation errors occurred.'
+        status: 500
+        traceId: '2304-328-02385-0235-03825'
+        errors:
+          title:
+            - 'Title is required'

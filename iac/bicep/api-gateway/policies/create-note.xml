@@ -1,0 +1,18 @@
+<policies>
+    <inbound>
+        <base />
+        <validate-content 
+            unspecified-content-type-action="prevent" 
+            size-exceeded-action="prevent" 
+            max-size="128"/>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
